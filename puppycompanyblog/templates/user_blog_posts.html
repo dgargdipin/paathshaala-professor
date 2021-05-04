@@ -7,9 +7,9 @@
 
 </div>
 
-{% for post in blog_post.items %}
-        <h2><a href="{{url_for('blogposts.blogpost',blog_post_id=post.id)}}">{{post.title}}</a></h2>
-        Written By: <a href="{{url_for('users.user_post',username=post.author.username)}}">{{post.author}}</a>
+{% for post in blog_posts.items %}
+        <h2><a href="{{url_for('blog_posts.blog_post',blog_post_id=post.id)}}">{{post.title}}</a></h2>
+        Written By: <a href="{{url_for('users.user_posts',username=post.author.username)}}">{{post.author}}</a>
         <p class="text-muted">Published On: {{post.date.strftime("%d %b %Y")}}</p><br>
         {% endfor %}
 </div>
