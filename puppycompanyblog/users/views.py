@@ -16,8 +16,10 @@ users=Blueprint('users',__name__)
 def register():
     form=RegistrationForm()
     if form.validate_on_submit():
-        user_data={k:v.data for k,v in form}
-        user=User(**user_data)
+        # user_data={k:v.data for k,v in form}
+        # print(user_data)
+        print(form)
+        user=User(form.email.data,form.username.data,form.password.data)
         db.session.add(user)
         db.session.commit()
         flash('Thanks for registration!')
@@ -36,7 +38,8 @@ def login():
             if next==None or not next[0]=='/':
                 next=url_for('core.index')
             return redirect(next)
-        return render_template('login.html',form=form)
+    
+    return render_template('login.html',form=form)
 
 
 @users.route('/logout')
@@ -61,6 +64,15 @@ def account():
         db.session.commit()
         flash('User account updated')
         return redirect(url_for('users.account'))
+    elif request.method=="GET":
+        form.username.data=current_user.username
+        form.email.data=current_user.email
     profile_image=url_for('static',filename='profile_pics/'+current_user.profile_image)
     return render_template('account.html',profile_image=profile_image,form=form)
-    
+
+@users.route("/<username>")
+def user_posts(username):
+    page=request.args.get('page',1,type=int)
+    user=User.query.filter_by(username=username).first_or_404()
+    blog_posts=BlogPost.query.filter_by(author=user).order_by(BlogPost.date.desc()).paginate(page=page,per_page=5)
+    return render_template('user_blog_posts.html',blog_posts=blog_posts,user=user)
