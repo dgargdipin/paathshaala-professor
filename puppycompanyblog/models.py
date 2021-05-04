@@ -10,7 +10,7 @@ def load_user(user_id):
     return User.query.get(user_id)
 
 
-class User(db.Model):
+class User(db.Model,UserMixin):
     __tablename__='users'
     id=db.Column(db.Integer,primary_key=True)
     profile_image=db.Column(db.String,nullable=False,default='default_profile.png')
@@ -31,7 +31,7 @@ class User(db.Model):
 
 
     pass
-class BlogPost(db.Model ):
+class BlogPost(db.Model):
     users=db.relationship(User)
     id=db.Column(db.Integer,primary_key=True)
     user_id=db.Column(db.Integer,db.ForeignKey('users.id'),nullable=False)
