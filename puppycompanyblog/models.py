@@ -1,5 +1,5 @@
 from enum import unique
-from puppycompanyblog.core.views import index
+# from puppycompanyblog.core.views import index
 from puppycompanyblog import db,login_manager
 from werkzeug.security import generate_password_hash,check_password_hash
 from flask_login import UserMixin
@@ -37,6 +37,7 @@ class BlogPost(db.Model):
     user_id=db.Column(db.Integer,db.ForeignKey('users.id'),nullable=False)
     date=db.Column(db.DateTime,nullable=False,default=datetime.utcnow)
     title=db.Column(db.String(200),nullable=False)
+    text=db.Column(db.String())
     def __init__(self,title,text,user_id):
         self.title=title
         self.text=text
