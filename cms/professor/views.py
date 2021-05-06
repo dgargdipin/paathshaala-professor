@@ -31,7 +31,6 @@ def login():
         user =Professor.query.filter_by(email=form.email.data).first()
         if user is not None and user.check_password(form.password.data):
             login_user(user)
-            flash('Login Professoruccess')
             next=request.args.get('next')
             if next==None or not next[0]=='/':
                 next=url_for('core.index')
