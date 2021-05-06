@@ -8,6 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+migrations/
 build/
 develop-eggs/
 dist/
@@ -137,5 +138,4 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-.sqlite
-.img
+*.sqlite
