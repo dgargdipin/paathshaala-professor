@@ -26,7 +26,7 @@ class Branch(db.Model):
     professors= db.relationship('Professor', backref='branch', lazy=True)
     def __init__(self,name):
         self.name = name
-    def __repr__(self):
+    def __repr__(self)-> str:
         return self.name
 class User(db.Model,UserMixin):
     __tablename__='users'
@@ -57,9 +57,11 @@ class Course(db.Model):
     name=db.Column(db.String())
     details=db.Column(db.String())
     prof_id = db.Column(db.Integer, db.ForeignKey('professors.id'), nullable=False)
-    course_code=db.Column(db.String(),unique=True)
+    course_code = db.Column(db.String(),unique=True)
     can_apply=db.Column(db.Boolean)
     branches=db.relationship('Branch',secondary=branch_helper,backref=db.backref('courses'))
+    courseNotes = db.relationship('courseNote', backref='course',order_by="desc(courseNote.time)")
+
     def __init__(self, name, course_code, details, prof_id,can_apply=True):
         self.name = name
         self.course_code = course_code
@@ -78,11 +80,34 @@ class Professor(db.Model, UserMixin):
     courses=db.relationship('Course',backref='professor',lazy=True)
     password_hash = db.Column(db.String(128))
     
-    def __init__(self,name,email,password,branch_id):
+    def __init__(self, name, email, password, branch_id):
         self.email = email
-        self.name=name
-        self.password_hash=generate_password_hash(password)
+        self.name = name
+        self.password_hash = generate_password_hash(password)
         self.branch_id = branch_id
+    def check_password(self,password):
+        return check_password_hash(self.password_hash,password)
 
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+class courseNote(db.Model):
+    __tablename__='coursenotes'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String())
+    details = db.Column(db.String())
+    time=db.Column(db.DateTime,nullable=False,default=datetime.now)
+    attachments=db.relationship('Attachment',backref='coursenote')
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
+    def __init__(self,title,details,course_id):
+        self.title=title
+        self.details=details
+        self.course_id=course_id
+class Attachment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String())
+    ext = db.Column(db.String(10))
+    link = db.Column(db.String())
+    coursenote_id=db.Column(db.Integer,db.ForeignKey('coursenotes.id'))
+    def __init__(self,name,ext,link,coursenote_id):
+        self.name=name
+        self.ext=ext
+        self.link=link
+        self.coursenote_id=coursenote_id
