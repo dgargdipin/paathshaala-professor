@@ -21,10 +21,62 @@
     {% if current_user==course.professor %}
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addCourseNote">Add Course
       Material</button>
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addAssignment">Add Assignment</button>
     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#confirmDrop">Remove Course</button>
     {% endif %}
     
 </div>
+
+
+  <div class="card">
+    <div class="card-header" id="headingOne">
+      <h5 class="mb-0">
+        <button class="btn btn-link" data-toggle="collapse" data-target="#collapseThree" aria-expanded="true"
+          aria-controls="collapseOne">
+          Assignments
+        </button>
+      </h5>
+    </div>
+
+    <div id="collapseThree" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+      <div class="card-body">
+        {% if course.assignments %}
+        {% for assignment in course.assignments %}
+        <div class="card" style="width: 100%;">
+          <div class="card-body">
+            <h5 class="card-title">{{assignment.title}} <small class="text-muted"> Deadline : <u>{{assignment.deadline.strftime('%I:%M %p, %d %b %Y')}}</u></small>
+{% if course.professor.id==current_user.id %}
+              <a href="{{url_for('course.remove_assignment',assignment_id=assignment.id)}}"><i
+                  class="fa fa-times"></i></a>
+
+
+              {% endif %}
+            </h5>
+
+            <p class="card-text" style="white-space: pre-wrap;">{{assignment.details}}</p>
+            {% if assignment.attachments %}
+            <h6>Attachments:</h6>
+            {% for attachment in assignment.attachments %}
+            <a href="{{attachment.link}}" class="card-link">{{attachment.name}}</a>
+            {% endfor %}
+
+            {% endif %}
+
+
+          </div>
+          <div class="card-footer">{{assignment.time.strftime('%I:%M %p, %d %b %Y' )}}</div>
+
+        </div>
+        {% endfor %}
+        {% else %}
+        Professor has provided no assignments :)
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+ 
+
 
 <div id="accordion">
   <div class="card">
@@ -130,19 +182,19 @@
       </div>
       <div class="modal-body">
         <form enctype="multipart/form-data" method="POST">
-          {{form.hidden_tag()}}
+          {{courseNoteForm.hidden_tag()}}
         
         
           <div class="form-group">
-            {{form.title.label(class='form-group')}}
-            {{form.title(class='form-control')}}
+            {{courseNoteForm.title.label(class='form-group')}}
+            {{courseNoteForm.title(class='form-control')}}
           </div>
           <div class="form-group">
-            {{form.details.label(class='form-group')}}
-            {{form.details(class='form-control')}}
+            {{courseNoteForm.details.label(class='form-group')}}
+            {{courseNoteForm.details(class='form-control')}}
           </div>
           <div class="form-group">
-          {{form_field(form.attachments)}}
+          {{form_field(courseNoteForm.attachments)}}
           </div>
         
         
@@ -150,7 +202,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      {{form.submit(class='btn btn-primary')}}</form>
+      {{courseNoteForm.submit1(class='btn btn-primary')}}</form>
       </div>
     </div>
   </div>
@@ -158,6 +210,47 @@
 
 
 
+<div class="modal fade" id="addAssignment" tabindex="-1" role="dialog" aria-labelledby="modelTitleId"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add material</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form enctype="multipart/form-data" method="POST">
+          {{addAssignmentForm.hidden_tag()}}
+
+
+          <div class="form-group">
+            {{addAssignmentForm.title.label(class='form-group')}}
+            {{addAssignmentForm.title(class='form-control')}}
+          </div>
+          <div class="form-group">
+            {{addAssignmentForm.details.label(class='form-group')}}
+            {{addAssignmentForm.details(class='form-control')}}
+          </div>
+          <div class="form-group">
+            {{addAssignmentForm.deadline.label(class='form-group')}}
+            {{addAssignmentForm.deadline(class='form-control')}}
+          </div>
+          <div class="form-group">
+            {{form_field(addAssignmentForm.attachments)}}
+          </div>
+
+
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        {{addAssignmentForm.submit2(class='btn btn-primary')}}</form>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 
