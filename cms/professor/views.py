@@ -20,7 +20,7 @@ def register():
         professor=Professor(form.name.data,form.email.data,form.password.data,form.branch.data)
         db.session.add(professor)
         db.session.commit()
-        flash('Thanks for registration!')
+        flash('Thanks for registration!','primary')
         return redirect(url_for('professors.login'))
     return render_template('register.html',form=form)
 
@@ -35,7 +35,10 @@ def login():
             if next==None or not next[0]=='/':
                 next=url_for('core.index')
             return redirect(next)
-    
+        elif user is None:
+            flash('E-Mail not found','danger')
+        else:
+            flash('Password incorrect','danger')
     return render_template('login.html',form=form)
 
 
