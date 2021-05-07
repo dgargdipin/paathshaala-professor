@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% if submissions %}
+<div class="jumbotron">
+    <h1 class="display-3">Submissions for {{assignment.title}}</h1>
+</div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name of Student</th>
+                    <th>Title of Submission</th>
+                    <th>View Submission</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                {% for submission in submissions %}
+                <tr>
+                    <td scope="row">{{loop.index}}</td>
+                    <td>{{submission.user.name}}
+                    </td>
+                    <td>{{submission.title}}</td>
+                    <td><!-- Button trigger modal -->
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#{{'submission'~submission.id}}">
+                      View
+                    </button>
+                    
+                    <!-- Modal -->
+                    <div class="modal fade" id="{{'submission'~submission.id}}" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">{{submission.user.name}}'s Submission</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                </div>
+                                <div class="modal-body">
+                                    <h6>Title</h6><p>{{submission.title}}</p>
+                                    <h6>Details</h6><p>{{submission.details}}</p>
+                                    {% if submission.attachments %}
+                                    <h6>Attachments</h6>
+                                            {% for attachment in submission.attachments %}
+                                                    <a href="{{attachment.link}}" class="card-link">{{attachment.name}}</a>
+                                            {% endfor %}
+                                            
+                                    {% endif %}
+                                    
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </td>
+                </tr>
+                {% endfor %}
+        
+        
+            </tbody>
+        </table>
+{% else %}
+        No submissions yet :(
+{% endif %}
+
+{% endblock %}

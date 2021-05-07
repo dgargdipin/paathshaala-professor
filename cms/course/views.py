@@ -1,3 +1,4 @@
+from operator import sub
 import pandas as pd
 import random
 import string
@@ -6,7 +7,7 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint,
 from flask_login import login_user, current_user, logout_user, login_required
 from flask_wtf import file
 from cms import basedir,ALLOWED_EXT,db
-from cms.models import Course, User,courseNote,Attachment,Assignment
+from cms.models import Course, Request, User,courseNote,Attachment,Assignment
 from .forms import addCourseNote,assignmentForm
 
 from datetime import datetime
@@ -32,8 +33,8 @@ def view_course(course_id):
     courseNoteForm=addCourseNote()
     addAssignmentForm=assignmentForm()
         # id = db.Column(db.Integer, primary_key=True)
-    # title = db.Column(db.String())
-    # details = db.Column(db.String())
+    # title = db.Column(db.String(100))
+    # details = db.Column(db.String(100))
     # attachments=db.relationship('Attachment',backref='coursenote')
     # course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
     # def __init__(self,title,details,course_id):
@@ -182,7 +183,6 @@ def export_students_course(course_id:int):
         abort(404)
     students=course.students
     df=pd.DataFrame.from_records([s.to_dict() for s in students],index='id')
-    df.set_index('id',inplace=True)
     print(df)
     savename = str(course.name) + \
         datetime.now().strftime("%Y-%m-%d_%H:%M")+'.xlsx'
@@ -190,3 +190,48 @@ def export_students_course(course_id:int):
     df.to_excel(os.path.join(basedir, '..', '..', 'temp',savename),index=True)
     return send_from_directory(os.path.join(basedir, '..', '..', 'temp'), filename=savename, as_attachment=True)
 
+
+
+@cb.route('/course/<assignment_id>/submissions')
+@login_required
+def view_assignment_submissions(assignment_id:int):
+    assignment=Assignment.query.filter_by(id=assignment_id).first()
+    if not assignment or current_user != assignment.course.professor:
+        abort(404)
+    
+    submissions=assignment.submissions
+    return render_template('view_submissions.html',submissions=submissions,assignment=assignment)
+
+
+@cb.route('/course/<course_id>/requests')
+@login_required
+def view_requests(course_id: int):
+    workingCourse=Course.query.filter_by(id=course_id).first()
+    if not workingCourse or workingCourse.professor!=current_user:
+        abort(401)
+    requests=workingCourse.requests 
+    return render_template('view_requests.html', requests=requests)
+
+
+
+@cb.route('/course/requests/accept/<request_id>')
+@login_required
+def request_accept(request_id: int):
+    workingRequest=Request.query.filter_by(id=request_id).first()
+    if not workingRequest or workingRequest.course.professor!=current_user:
+        abort(401)
+    workingRequest.user.courses.append(workingRequest.course)
+    workingRequest.status=1
+    db.session.commit()
+    return redirect(url_for('course.view_requests',course_id=workingRequest.course.id))
+
+
+@cb.route('/course/requests/decline/<request_id>')
+@login_required
+def request_decline(request_id: int):
+    workingRequest = Request.query.filter_by(id=request_id).first()
+    if not workingRequest or workingRequest.course.professor != current_user:
+        abort(401)
+    workingRequest.status=2
+    db.session.commit()
+    return redirect(url_for('course.view_requests', course_id=workingRequest.course.id))

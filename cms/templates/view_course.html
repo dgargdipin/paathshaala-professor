@@ -23,6 +23,7 @@
       Material</button>
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addAssignment">Add Assignment</button>
     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#confirmDrop">Remove Course</button>
+    <a role="button" class="btn btn-primary" href="{{url_for('course.view_requests',course_id=course.id)}}">View enrollment requests</a>
     {% endif %}
     
 </div>
@@ -52,7 +53,7 @@
 
               {% endif %}
             </h5>
-
+            <a class="btn btn-primary" href="{{url_for('course.view_assignment_submissions',assignment_id=assignment.id)}}" role="button">View Submission</a>
             <p class="card-text" style="white-space: pre-wrap;">{{assignment.details}}</p>
             {% if assignment.attachments %}
             <h6>Attachments:</h6>

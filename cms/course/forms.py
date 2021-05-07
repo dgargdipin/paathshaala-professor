@@ -10,8 +10,8 @@ from cms.models import Professor,Course,Branch
 
 class addCourseNote(FlaskForm):
     # id = db.Column(db.Integer, primary_key=True)
-    # title = db.Column(db.String())
-    # details = db.Column(db.String())
+    # title = db.Column(db.String(100))
+    # details = db.Column(db.String(100))
     # attachments=db.relationship('Attachment',backref='coursenote')
     # course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
     # def __init__(self,title,details,course_id):
