@@ -21,7 +21,7 @@ branch_helper=db.Table('branch_helper',
 class Branch(db.Model):
     __tablename__='branches'
     id= db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
     students= db.relationship('User', backref='branch', lazy=True)
     professors= db.relationship('Professor', backref='branch', lazy=True)
     def __init__(self,name):
@@ -30,9 +30,9 @@ class Branch(db.Model):
         return self.name
 class User(db.Model,UserMixin):
     __tablename__='users'
-    name=db.Column(db.String(),nullable=False)
+    name=db.Column(db.String(100),nullable=False)
     id=db.Column(db.Integer,primary_key=True)
-    name = db.Column(db.String())
+    name = db.Column(db.String(100))
     email = db.Column(db.String(64),unique=True,index=True)
     password_hash=db.Column(db.String(128))
     year=db.Column(db.Integer())
@@ -40,6 +40,8 @@ class User(db.Model,UserMixin):
     courses = db.relationship('Course', secondary=course_helper,
                               backref=db.backref('students'))
     submissions = db.relationship('Submission',backref='user')
+    requests = db.relationship('Request', backref='user')
+
     def __init__(self,name,email,password,year,branch_id):
         self.name=name
         self.email=email
@@ -57,18 +59,26 @@ class User(db.Model,UserMixin):
     def check_password(self,password):
         return check_password_hash(self.password_hash,password)
 
+    @property
+    def requested_courses(self):
+        req_courses = []
+        for request in self.requests:
+            req_courses.append(request.course)
+        return req_courses
+
 
 class Course(db.Model):
     __tablename__='courses'
     id=db.Column(db.Integer,primary_key=True)
-    name=db.Column(db.String())
-    details=db.Column(db.String())
+    name=db.Column(db.String(100))
+    details=db.Column(db.String(100))
     prof_id = db.Column(db.Integer, db.ForeignKey('professors.id'), nullable=False)
-    course_code = db.Column(db.String(),unique=True)
+    course_code = db.Column(db.String(100),unique=True)
     can_apply=db.Column(db.Boolean)
     branches=db.relationship('Branch',secondary=branch_helper,backref=db.backref('courses'))
     courseNotes = db.relationship('courseNote', backref='course',order_by="desc(courseNote.time)")
     assignments = db.relationship('Assignment', backref='course',order_by="desc(Assignment.time)")
+    requests = db.relationship('Request', backref='course')
 
     def __init__(self, name, course_code, details, prof_id,can_apply=True):
         self.name = name
@@ -81,7 +91,7 @@ class Course(db.Model):
 class Professor(db.Model, UserMixin):
     __tablename__ = 'professors'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String())
+    name = db.Column(db.String(100))
     email = db.Column(db.String(64), unique=True, index=True)
     branch_id=db.Column(db.Integer, db.ForeignKey(
         'branches.id'), nullable=False)
@@ -99,8 +109,8 @@ class Professor(db.Model, UserMixin):
 class courseNote(db.Model):
     __tablename__='coursenotes'
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String())
-    details = db.Column(db.String())
+    title = db.Column(db.String(100))
+    details = db.Column(db.String(100))
     time=db.Column(db.DateTime,nullable=False,default=datetime.now)
     attachments=db.relationship('Attachment',backref='coursenote')
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
@@ -111,8 +121,8 @@ class courseNote(db.Model):
 class Assignment(db.Model):
     __tablename__='assignments'
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String())
-    details = db.Column(db.String())
+    title = db.Column(db.String(100))
+    details = db.Column(db.String(100))
     time=db.Column(db.DateTime,nullable=False,default=datetime.now)
     attachments=db.relationship('Attachment',backref='assignment')
     submissions = db.relationship('Submission', backref='assignment')
@@ -126,33 +136,51 @@ class Assignment(db.Model):
 
 class Attachment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String())
+    name = db.Column(db.String(100))
     ext = db.Column(db.String(10))
-    link = db.Column(db.String())
+    link = db.Column(db.String(100))
     coursenote_id=db.Column(db.Integer,db.ForeignKey('coursenotes.id'))
     assignment_id=db.Column(db.Integer,db.ForeignKey('assignments.id'))
     submission_id = db.Column(db.Integer, db.ForeignKey('submission.id'))
-
-    def __init__(self,name,ext,link,coursenote_id=None,assignment_id=None,submission_id=None):
+    request_id = db.Column(db.Integer, db.ForeignKey('request.id'))
+    def __init__(self,name,ext,link,coursenote_id=None,assignment_id=None,submission_id=None,request_id=None):
         self.name=name
         self.ext=ext
         self.link=link
         self.coursenote_id=coursenote_id
         self.assignment_id=assignment_id
         self.submission_id=submission_id
+        self.request_id=request_id
 
 
 class Submission(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String())
-    details = db.Column(db.String())
+    title = db.Column(db.String(100))
+    details = db.Column(db.String(100))
     time = db.Column(db.DateTime, nullable=False, default=datetime.now)
     attachments = db.relationship('Attachment', backref='submissions')
     assignment_id = db.Column(db.Integer, db.ForeignKey('assignments.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-
-    def __init__(self, title, details, assignment_id, user_id):
+    def __init__(self, title, details, assignment_id,user_id):
         self.title = title
         self.details = details
         self.assignment_id = assignment_id
+        self.user_id=user_id
+
+
+class Request(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
+    title = db.Column(db.String(100))
+    details = db.Column(db.String(100))
+    time = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    attachments = db.relationship('Attachment', backref='request')
+    status = db.Column(db.Integer,default=0)#0 for pending 1 for accepted 2 for declined
+    def __init__(self, user_id, course_id,title,details):
         self.user_id = user_id
+        self.course_id = course_id
+        self.title = title
+        self.details = details
+
+    pass
