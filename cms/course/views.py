@@ -1,3 +1,4 @@
+import pandas as pd
 import random
 import string
 import os
@@ -5,7 +6,7 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint,
 from flask_login import login_user, current_user, logout_user, login_required
 from flask_wtf import file
 from cms import basedir,ALLOWED_EXT,db
-from cms.models import Course,courseNote,Attachment,Assignment
+from cms.models import Course, User,courseNote,Attachment,Assignment
 from .forms import addCourseNote,assignmentForm
 
 from datetime import datetime
@@ -153,13 +154,39 @@ def remove_assignment(assignment_id):
     cnd=courseNotetoDelete
     if cnd.attachments:
         for attachment in cnd.attachments:
-            file_path = os.path.join(
-                basedir, "..", "..", "static_material", os.path.basename(attachment.link))
+            file_path = os.path.join(basedir, "..", "..", "static_material", os.path.basename(attachment.link))
             if os.path.isfile(file_path):
                 os.remove(file_path)
             db.session.delete(attachment)
+    if cnd.submissions:
+        for submission in cnd.submissions:
+            if submission.attachments:
+                for attachment in submission.attachments:
+                    file_path = os.path.join(
+                        basedir, "..", "..", "static_material", os.path.basename(attachment.link))
+                    if os.path.isfile(file_path):
+                        os.remove(file_path)
+                    db.session.delete(attachment)
+                db.session.delete(submission)
+
     db.session.delete(cnd)
     db.session.commit()
     return redirect(url_for('course.view_course',course_id=course_id))
 
+
+@cb.route('/course/<course_id>/export')
+@login_required
+def export_students_course(course_id:int):
+    course=Course.query.filter_by(id=course_id).first()
+    if not course or current_user != course.professor:
+        abort(404)
+    students=course.students
+    df=pd.DataFrame.from_records([s.to_dict() for s in students],index='id')
+    df.set_index('id',inplace=True)
+    print(df)
+    savename = str(course.name) + \
+        datetime.now().strftime("%Y-%m-%d_%H:%M")+'.xlsx'
+    savename=secure_filename(savename)
+    df.to_excel(os.path.join(basedir, '..', '..', 'temp',savename),index=True)
+    return send_from_directory(os.path.join(basedir, '..', '..', 'temp'), filename=savename, as_attachment=True)
 

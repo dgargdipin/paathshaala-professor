@@ -131,7 +131,10 @@
         </button>
       </h5>
     </div>
-    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion"><br>
+      <a class="btn btn-dark" href='{{url_for('course.export_students_course',course_id=course.id)}}'>
+              Export to Excel
+      </a>
       <div class="card-body">
         {% if course.students %}
                 <table class="table">
