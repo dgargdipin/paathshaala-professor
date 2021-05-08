@@ -28,9 +28,12 @@ class RegistrationForm(FlaskForm):
     
 
 class UpdateProfForm(FlaskForm):
-    email=StringField('Email',validators=[DataRequired('Data required'),Email('email required')])
+    email=StringField('Email',validators=[Email('email required')])
+    password = StringField('Password')
+    submit = SubmitField('Update')
     submit=SubmitField('Update')
-    def check_email(self,field):
+
+    def validate_email(self, field):
         if Professor.query.filter_by(email=field.data).first():
             raise ValidationError('Your email has been registered already')
     
