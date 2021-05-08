@@ -5,6 +5,7 @@
 
 from flask import render_template,url_for,flash,redirect,request,Blueprint
 from flask_login import login_user,current_user,logout_user,login_required
+from werkzeug.security import generate_password_hash
 from cms import db
 from cms.models import Professor
 from cms.professor.forms import RegistrationForm,LoginForm,UpdateProfForm
@@ -47,3 +48,21 @@ def logout():
     logout_user()
     return redirect(url_for("core.index"))
 
+
+@professors.route('/account', methods=['GET', 'POST'])
+@login_required
+def account():
+    form = UpdateProfForm()
+    if form.validate_on_submit():
+
+        if form.email.data:
+            current_user.email = form.email.data
+        if form.password.data:
+            current_user.password_hash = generate_password_hash(
+                form.password.data)
+        db.session.commit()
+        flash('User account updated','primary')
+        return redirect(url_for('professors.account'))
+    elif request.method == "GET":
+        form.email.data = current_user.email
+    return render_template('account.html', form=form)
