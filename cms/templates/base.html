@@ -14,10 +14,13 @@
         integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
         crossorigin="anonymous"></script>
 <link rel="stylesheet" href={{ url_for('static', filename='style.css') }}>
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+{% block personal %}
+{% endblock personal %}
+
     <meta charset="utf-8">
-    <title></title>
+    <title>Professor</title>
 </head>
 
 <body>
@@ -47,7 +50,9 @@
             <a href="{{url_for('professors.register')}}">Register</a>
         </li>
     {% endif %}
-    
+    <span class="navbar-text ml-auto">
+        Professor Portal
+    </span>
     </ul>
     <div class="container">
         {% block content %}
