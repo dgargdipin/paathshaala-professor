@@ -183,7 +183,7 @@ def remove_assignment(assignment_id):
 @login_required
 def export_students_course(course_id:int):
     course=Course.query.filter_by(id=course_id).first()
-    if not course or current_user != course.professor:
+    if not course or current_user != course.professor or not course.students:
         abort(404)
     students=course.students
     df=pd.DataFrame.from_records([s.to_dict() for s in students],index='id')
