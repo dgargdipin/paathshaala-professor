@@ -14,13 +14,18 @@
 {% block content %}
 <div class="jumbotron"><h1>
     {% if current_user.is_authenticated %}
-            Welcome {{current_user.name}}
+            Welcome {{current_user.name}}</h1>
         {%else%}
-        Welcome to CMS
+        <h1 class="display-4">Welcome to Course Management System</h1>
+        <hr class="my-4">
+        <p class="lead">This is the CS 207 Database Management System created by Dipin Garg, Harsh Kushwaha and Jainil Shah.
+            <br>With this project
+            we hope to ease up this difficult process of online classes for both professors and students.</p>
+
     {% endif %}
 
     
-</h1></div>
+</div>
 <div class="container">
     {% for error in form.name.errors %}
     <div class="alert alert-danger" role="alert">

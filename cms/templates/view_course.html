@@ -23,6 +23,7 @@
       Material</button>
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addAssignment">Add Assignment</button>
     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#confirmDrop">Remove Course</button>
+    <a href="{{ url_for('course.all_quizzes', course_id=course.id) }}" class="btn btn-primary">View Quizzes</a>
     <a role="button" class="btn btn-primary" href="{{url_for('course.view_requests',course_id=course.id)}}">View enrollment requests</a>
     {% endif %}
     
@@ -200,9 +201,9 @@
           <div class="form-group">
           {{form_field(courseNoteForm.attachments)}}
           </div>
-        
-        
-        
+
+
+
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

@@ -7,8 +7,8 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint,
 from flask_login import login_user, current_user, logout_user, login_required
 from flask_wtf import file
 from cms import basedir,ALLOWED_EXT,db
-from cms.models import Course, Request, User,courseNote,Attachment,Assignment
-from .forms import addCourseNote,assignmentForm
+from cms.models import Course, Request, User,courseNote,Attachment,Assignment, Quiz, Question, Option
+from .forms import addCourseNote,assignmentForm, quizForm, questionForm
 
 from datetime import datetime
 from werkzeug.utils import secure_filename
@@ -32,6 +32,7 @@ def view_course(course_id):
     courseToRender=Course.query.filter_by(id=course_id).first()
     courseNoteForm=addCourseNote()
     addAssignmentForm=assignmentForm()
+
         # id = db.Column(db.Integer, primary_key=True)
     # title = db.Column(db.String(100))
     # details = db.Column(db.String(100))
@@ -239,3 +240,95 @@ def request_decline(request_id: int):
     workingRequest.status=2
     db.session.commit()
     return redirect(url_for('course.view_requests', course_id=workingRequest.course.id))
+
+
+@cb.route('/course/<course_id>/quizzes/create_quiz/', methods=['GET', 'POST'])
+@login_required
+def create_quiz(course_id: int):
+    course = Course.query.filter_by(id=course_id)
+    if not course:
+        abort(405)
+    quiz_form = quizForm()
+    if request.method == 'POST' and quiz_form.validate:
+        quiz = Quiz(course_id=course_id, name=quiz_form.name.data, start_time=quiz_form.start_time.data,
+                    end_time=quiz_form.end_time.data)
+        db.session.add(quiz)
+        db.session.commit()
+        return redirect(url_for('course.add_question_to_quiz', course_id=course_id, quiz_id=quiz.id))
+    return render_template('create_quiz.html', quiz_form=quiz_form)
+
+
+@cb.route('/course/<course_id>/quizzes')
+@login_required
+def all_quizzes(course_id: int):
+    course = Course.query.filter_by(id=course_id)
+    if not course:
+        abort(405)
+    course = course.first()
+    return render_template('all_quizzes.html', quizzes=course.quizzes, course_id=course.id)
+
+
+@cb.route('/course/<course_id>/quizzes/<quiz_id>/')
+@login_required
+def display_quiz(course_id: int, quiz_id: int):
+    course = Course.query.filter_by(id=course_id)
+    if not course:
+        abort(405)
+    quiz = Quiz.query.filter_by(id=quiz_id)
+    if not quiz:
+        abort(405)
+    quiz = quiz.first()
+    bool_values = []
+    for question in quiz.questions:
+        cur_bool_values = [False, False, False, False]
+        for a in question.ans:
+            if a == '1':
+                cur_bool_values[0] = True
+            elif a == '2':
+                cur_bool_values[1] = True
+            elif a == '3':
+                cur_bool_values[2] = True
+            elif a == '4':
+                cur_bool_values[3] = True
+        bool_values.append(cur_bool_values)
+    return render_template('display_quiz.html', questions=quiz.questions, course_id=course_id, quiz_id=quiz_id,
+                           bool_values=bool_values)
+
+
+@cb.route('/course/<course_id>/quizzes/<quiz_id>/add_question', methods=['GET', 'POST'])
+@login_required
+def add_question_to_quiz(course_id: int, quiz_id: int):
+    quiz = Quiz.query.filter_by(id=quiz_id)
+    if not quiz:
+        abort(405)
+    question_form = questionForm()
+    if request.method == 'POST' and question_form.validate:
+        question = Question(quiz_id=quiz_id, question=question_form.question.data, marks=question_form.marks.data,
+                            ans=question_form.ans.data, is_multicorrect=question_form.is_multi_correct.data)
+        db.session.add(question)
+        db.session.commit()
+        options_right = [False, False, False, False]
+        for a in question_form.ans.data:
+            print(a)
+            if a == '1':
+                options_right[0] = True
+            elif a == '2':
+                options_right[1] = True
+            elif a == '3':
+                options_right[2] = True
+            elif a == '4':
+                options_right[3] = True
+        option = Option(question_id=question.id, option=question_form.option1.data, is_right=options_right[0])
+        db.session.add(option)
+        db.session.commit()
+        option = Option(question_id=question.id, option=question_form.option2.data, is_right=options_right[1])
+        db.session.add(option)
+        db.session.commit()
+        option = Option(question_id=question.id, option=question_form.option3.data, is_right=options_right[2])
+        db.session.add(option)
+        db.session.commit()
+        option = Option(question_id=question.id, option=question_form.option4.data, is_right=options_right[3])
+        db.session.add(option)
+        db.session.commit()
+        return redirect(url_for('course.display_quiz', course_id=course_id, quiz_id=quiz_id))
+    return render_template('add_question.html', question_form=question_form)
