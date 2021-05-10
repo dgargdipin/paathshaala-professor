@@ -47,10 +47,12 @@ class assignmentForm(addCourseNote):
 class questionForm(FlaskForm):
     question = StringField('Question ?', validators=[DataRequired('Data required')])
     is_multi_correct = BooleanField('Multi Correct Question ?')
+    is_partial = BooleanField('Partial Marking ?')
     marks = IntegerField('Marks')
     option1 = StringField('Option 1', validators=[DataRequired('Data required')])
     option2 = StringField('Option 2', validators=[DataRequired('Data required')])
     option3 = StringField('Option 3', validators=[DataRequired('Data required')])
     option4 = StringField('Option 4', validators=[DataRequired('Data required')])
+
     ans = StringField('Enter answer options', validators=[DataRequired('Data required')])
     submit = SubmitField('Submit')

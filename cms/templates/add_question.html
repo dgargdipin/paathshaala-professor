@@ -23,6 +23,10 @@
             {{question_form.is_multi_correct(class='form-control')}}
           </div>
         <div class="form-group">
+            {{question_form.is_partial.label(class='form-group')}}
+            {{question_form.is_partial(class='form-control')}}
+          </div>
+        <div class="form-group">
             {{question_form.marks.label(class='form-group')}}
             {{question_form.marks(class='form-control')}}
           </div>
