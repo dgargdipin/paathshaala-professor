@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<h2>All submissions for {{quiz.name}}</h2>
+Total marks {{quiz.marks}}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Index</th>
+            <th>Name of Student</th>
+            <th>Marks</th>
+            <th>View Response</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for response in quiz.responses %}
+        <tr>
+            <td scope="row">{{loop.index}}</td>
+            <td>{{response.user.name}}</td>
+            <td>{{response.marks}}/{{quiz.marks}}</td>
+            <td>
+                <!-- Button trigger modal -->
+                <a type="button" href="{{url_for('course.display_attempt',attempt_id=response.id)}}" class="btn btn-primary">
+                    View
+                </button>
+
+            </td>
+            
+        </tr>
+        {% endfor %}
+
+    </tbody>
+</table>
+
+
+
+{% endblock %}

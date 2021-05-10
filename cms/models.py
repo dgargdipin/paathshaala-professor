@@ -41,6 +41,7 @@ class User(db.Model,UserMixin):
                               backref=db.backref('students'))
     submissions = db.relationship('Submission',backref='user')
     requests = db.relationship('Request', backref='user')
+    quiz_responses = db.relationship('QuizResponse', backref='user')
 
     def __init__(self,name,email,password,year,branch_id):
         self.name=name
@@ -80,6 +81,7 @@ class Course(db.Model):
     assignments = db.relationship('Assignment', backref='course',order_by="desc(Assignment.time)")
     quizzes = db.relationship('Quiz', backref='course', order_by="desc(Quiz.start_time)")
     requests = db.relationship('Request', backref='course')
+    discussion_thread=db.relationship('DiscussionThread',backref='course',uselist=False)
 
     def __init__(self, name, course_code, details, prof_id,can_apply=True):
         self.name = name
@@ -145,7 +147,7 @@ class Attachment(db.Model):
     submission_id = db.Column(db.Integer, db.ForeignKey('submission.id'))
     request_id = db.Column(db.Integer, db.ForeignKey('request.id'))
     discussionpost_id = db.Column(db.Integer, db.ForeignKey('discussionposts.id'))
-    def __init__(self,name,ext,link,coursenote_id=None,assignment_id=None,submission_id=None,request_id=None):
+    def __init__(self,name,ext,link,coursenote_id=None,assignment_id=None,submission_id=None,request_id=None,discussionpost_id=None):
         self.name=name
         self.ext=ext
         self.link=link
@@ -153,6 +155,7 @@ class Attachment(db.Model):
         self.assignment_id=assignment_id
         self.submission_id=submission_id
         self.request_id=request_id
+        self.discussionpost_id=discussionpost_id
 
 
 class Submission(db.Model):
@@ -199,6 +202,13 @@ class Quiz(db.Model):
     end_time = db.Column(db.DateTime, nullable=False, default=datetime.now)
     questions = db.relationship('Question', backref='quiz')
     responses = db.relationship('QuizResponse', backref='quiz')
+    @property
+    def marks(self):
+        ans=0
+        for q in self.questions:
+            ans+=q.marks
+        return ans
+
 
 
 class Question(db.Model):
@@ -207,10 +217,11 @@ class Question(db.Model):
     quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.id'))
     question = db.Column(db.String(), nullable=False)
     options = db.relationship('Option', backref='question')
-    ans = db.Column(db.String(), nullable=False)
+    ans = db.Column(db.String(), nullable=False,default="")
     marks = db.Column(db.Integer, nullable=False, default=1)
     is_multicorrect = db.Column(db.Boolean, default=False)
     responses = db.relationship('quizQuestionResponse', backref='question')
+    is_partial = db.Column(db.Boolean, default=False)
 
 
 class Option(db.Model):
@@ -218,7 +229,8 @@ class Option(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     question_id = db.Column(db.Integer, db.ForeignKey('questions.id'))
     option = db.Column(db.String, nullable=False)
-    is_right = db.Column(db.Boolean, default=False)  # for partial marking support
+    # for partial marking support
+    is_right = db.Column(db.Boolean, default=False)
 
 
 class quizQuestionResponse(db.Model):
@@ -232,14 +244,28 @@ class quizQuestionResponse(db.Model):
 
     @property
     def isCorrect(self):
-        return self.response.strip.split(',').sorted() == self.question.ans.strip.split(',').sorted()
+        print(self.response,self.question.ans)
+        return sorted(self.response.split(',')) == sorted(self.question.ans.split(','))
 
     @property
     def marks(self):
         if self.isCorrect:
             return self.question.marks
         else:
-            return 0
+            if self.question.is_partial:
+                ans = 0
+                for resp_id_string in self.response.split(','):
+                    print(resp_id_string, self.question.ans.split(
+                        ','), self.response)
+                    if resp_id_string in self.question.ans.split(','):
+                        ans += 1
+                return ans*self.question.marks/len(self.question.ans.split(','))
+            else:
+                return 0
+
+    @property
+    def attemptlist(self):
+        return self.response.split(',')
 
 
 class QuizResponse(db.Model):
@@ -247,7 +273,15 @@ class QuizResponse(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     quiz_id = db.Column(db.Integer, db.ForeignKey('quizzes.id'))
-    quizQuestionResponses = db.relationship('quizQuestionResponse', backref='quiz_response')
+    quizQuestionResponses = db.relationship(
+        'quizQuestionResponse', backref='quiz_response')
+
+    @property
+    def marks(self):
+        ans = 0
+        for qqr in self.quizQuestionResponses:
+            ans += qqr.marks
+        return ans
 
 
 class DiscussionThread(db.Model):
@@ -256,14 +290,16 @@ class DiscussionThread(db.Model):
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
     title = db.Column(db.String())
     details = db.Column(db.String())
-    posts = db.relationship('DiscussionPost', backref='quiz_response')
+    posts = db.relationship('DiscussionPost', backref='posts')
 
 
 class DiscussionPost(db.Model):
     __tablename__ = 'discussionposts'
     id = db.Column(db.Integer, primary_key=True)
-    discussion_id = db.Column(db.Integer, db.ForeignKey('discussionthreads.id'))
+    discussion_id = db.Column(
+        db.Integer, db.ForeignKey('discussionthreads.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     title = db.Column(db.String())
     details = db.Column(db.String())
+    timeofpost = db.Column(db.DateTime, nullable= False, default= datetime.utcnow)
     attachments = db.relationship('Attachment', backref='post')

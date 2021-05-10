@@ -7,8 +7,8 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint,
 from flask_login import login_user, current_user, logout_user, login_required
 from flask_wtf import file
 from cms import basedir,ALLOWED_EXT,db
-from cms.models import Course, Request, User,courseNote,Attachment,Assignment, Quiz, Question, Option
-from .forms import addCourseNote,assignmentForm, quizForm, questionForm
+from cms.models import Course, QuizResponse, Request, User,courseNote,Attachment,Assignment, Quiz, Question, Option, DiscussionThread, DiscussionPost, Professor
+from .forms import addCourseNote,assignmentForm, quizForm, questionForm, postForm
 
 from datetime import datetime
 from werkzeug.utils import secure_filename
@@ -304,31 +304,133 @@ def add_question_to_quiz(course_id: int, quiz_id: int):
     question_form = questionForm()
     if request.method == 'POST' and question_form.validate:
         question = Question(quiz_id=quiz_id, question=question_form.question.data, marks=question_form.marks.data,
-                            ans=question_form.ans.data, is_multicorrect=question_form.is_multi_correct.data)
+                            is_multicorrect=question_form.is_multi_correct.data,is_partial=question_form.is_partial.data)
         db.session.add(question)
         db.session.commit()
-        options_right = [False, False, False, False]
-        for a in question_form.ans.data:
+        numOptions=4
+        options_right = [False]*numOptions
+        print(options_right)
+        mList = [int(e) if e.isdigit()
+                 else e for e in question_form.ans.data.split(',')]
+
+        for a in mList:
+            if(a>numOptions):abort(405)
             print(a)
-            if a == '1':
-                options_right[0] = True
-            elif a == '2':
-                options_right[1] = True
-            elif a == '3':
-                options_right[2] = True
-            elif a == '4':
-                options_right[3] = True
-        option = Option(question_id=question.id, option=question_form.option1.data, is_right=options_right[0])
-        db.session.add(option)
-        db.session.commit()
-        option = Option(question_id=question.id, option=question_form.option2.data, is_right=options_right[1])
-        db.session.add(option)
-        db.session.commit()
-        option = Option(question_id=question.id, option=question_form.option3.data, is_right=options_right[2])
-        db.session.add(option)
-        db.session.commit()
-        option = Option(question_id=question.id, option=question_form.option4.data, is_right=options_right[3])
-        db.session.add(option)
+            options_right[a-1]=True
+        print(options_right)
+
+        options_arr=[]
+        for i in range(numOptions):
+            option = Option(question_id=question.id, option=getattr(
+                question_form, f"option{i+1}").data, is_right=options_right[i])
+            print(options_right[i])
+            options_arr.append(option)
+
+            db.session.add(option)
+            db.session.commit()
+            print(option.id,option.is_right)
+        # db.session.add_all(options_arr)
+        # db.session.commit()
+        idlist=[]
+        for option in options_arr:
+            if option.is_right:
+                print(option.option)
+                idlist.append(option.id)
+        
+        question.ans = ','.join(str(v) for v in idlist)
+        print(question.ans)
         db.session.commit()
         return redirect(url_for('course.display_quiz', course_id=course_id, quiz_id=quiz_id))
     return render_template('add_question.html', question_form=question_form)
+
+
+@cb.route('/display/quiz/<attempt_id>')
+@login_required
+def display_attempt(attempt_id):
+    user_response = QuizResponse.query.get_or_404(attempt_id)
+    if current_user != user_response.quiz.course.professor:
+        abort(405)
+
+    return render_template('display_attempt.html', attempt=user_response, zip=zip)
+    # return render_template('display_quiz.html', questions=quiz.questions, course_id=course_id, quiz_id=quiz_id,
+    #    bool_values=bool_values)
+
+
+
+@cb.route('/display/quiz/<quiz_id>/all')
+@login_required
+def display_attempts(quiz_id):
+    quiz=Quiz.query.get_or_404(quiz_id)
+    if current_user!=quiz.course.professor:
+        abort(405)
+    
+    return render_template('display_all_attempts.html', quiz=quiz)
+    # return render_template('display_quiz.html', questions=quiz.questions, course_id=course_id, quiz_id=quiz_id,
+    #    bool_values=bool_values)
+
+
+@cb.route('/course/<course_id>/discussion_forum', methods=['GET', 'POST'])
+@login_required
+def discussion_forum(course_id: int):
+    
+    course = Course.query.filter_by(id=course_id).first()
+    if not course:
+        abort(405)
+    discussion_forum = DiscussionThread.query.filter_by(course_id= course_id).first()
+    # if discussion_forum and discussion_forum.course_id != current_user:
+    #     abort(405)
+    if not discussion_forum:
+        new_discussion = DiscussionThread(course_id= course_id, title= course.name, details= course.details)
+        db.session.add(new_discussion)
+        db.session.commit()
+    discussion_forum = DiscussionThread.query.filter_by(course_id= course_id).first()
+    print("discussion_forum", discussion_forum)
+    Posts = DiscussionPost.query.filter_by(discussion_id= discussion_forum.id)
+    print("Posts is- ", Posts)
+    Names = {}
+    for post in Posts:
+        temp_user = User.query.filter_by(id= post.user_id).first()
+        if not temp_user:
+            temp_user = Professor.query.filter_by(id= post.user_id).first()
+        Names[post.user_id] = temp_user.name
+
+    addpostForm= postForm()
+    if request.method == 'POST':
+        if request.form.get("content"):
+            content = request.form.get("content")
+            user_id = current_user.id
+            new_post = DiscussionPost(user_id= user_id, discussion_id= discussion_forum.id, details= content)
+            db.session.add(new_post)
+            db.session.commit() 
+        # return render_template('discussion_forum.html', Posts= Posts, course_id=course_id,Names= Names)
+        if addpostForm.submit.data and addpostForm.validate:
+            attachments=[]
+            if not current_user.is_authenticated:
+                abort(405)
+            user_id = current_user.id
+            new_post=DiscussionPost(details=addpostForm.details.data, user_id= user_id, discussion_id= discussion_forum.id)
+            db.session.add(new_post)
+            db.session.commit()
+
+            if addpostForm.attachments.data:
+                for uploaded_file in request.files.getlist('attachments'):
+
+                    filename, file_extension = os.path.splitext(uploaded_file.filename)
+                    if not filename or not file_extension:
+                        continue
+                    savename = secure_filename(filename)+''.join(
+                        random.choice(string.ascii_lowercase) for i in range(16))+file_extension
+                    print(filename,savename)
+                    if savename=="":
+                        break
+                    
+                    uploaded_file.save(os.path.join(basedir, '..', '..', 'static_material', savename))
+                    new_attachment = Attachment(
+                        filename, file_extension,url_for('course.serve_file',filename=savename),discussionpost_id=new_post.id)
+                    attachments.append(new_attachment)
+            print(attachments)
+            db.session.add_all(attachments)
+            db.session.commit()
+        return redirect(url_for('course.discussion_forum', course_id=course_id))
+
+    return render_template('discussion_forum.html', Posts= Posts, course_id=course_id,Names= Names, addAttachmentForm= addpostForm)
