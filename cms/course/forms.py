@@ -56,3 +56,9 @@ class questionForm(FlaskForm):
 
     ans = StringField('Enter answer options', validators=[DataRequired('Data required')])
     submit = SubmitField('Submit')
+
+
+class postForm(FlaskForm):
+    details = TextAreaField('Details', validators=[DataRequired('Data required')])
+    attachments = MultipleFileField('Attachments')
+    submit = SubmitField('Submit')
