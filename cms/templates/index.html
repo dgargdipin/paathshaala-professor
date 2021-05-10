@@ -57,7 +57,7 @@
                 {% for course in courses %}
                         <tr>
                             <td scope="row">{{loop.index}}</td>
-                            <td><a href={{url_for('course.view_course',course_id=course.id)}} class="btn btn-link">{{course.name}}</a>
+                            <td><a href={{url_for('course.view_course',course_id=course.id)}} class="btn btn-link courseLinks">{{course.name}}</a>
 
                             </td>
                             <td>{{course.course_code}}</td>
