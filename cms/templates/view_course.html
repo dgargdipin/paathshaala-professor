@@ -95,7 +95,7 @@
       <div class="card-body">
         {% if course.courseNotes %}
                 {% for courseNote in course.courseNotes %}
-                <div class="card" style="width: 100%;">
+                <div class="card courseNoteCard" style="width: 100%;">
                   <div class="card-body">
                     <h5 class="card-title">{{courseNote.title}}{% if course.professor.id==current_user.id %}
                       <a href="{{url_for('course.remove_courseNote',courseNote_id=courseNote.id)}}"><i class="fa fa-times"></i></a>
