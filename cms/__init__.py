@@ -9,6 +9,12 @@ print(basedir)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + \
     os.path.join(basedir, '..', '..', 'data.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
+if os.getenv('testing')=='true':
+    print("TESTING MODE")
+    app.config['WTF_CSRF_ENABLED']=False
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + \
+    os.path.join(basedir, '..', '..', 'data_test.sqlite')
+
 db=SQLAlchemy(app)
 
 
