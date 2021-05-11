@@ -40,5 +40,7 @@ export testing=true
 ```
 then just a simple `pytest -v` will run all the functional and unit tests.
 
+**After you are done testing make sure to run ** `export testing=false`
+
 
 
