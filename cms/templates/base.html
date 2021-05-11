@@ -25,35 +25,42 @@
 
 <body>
 
-    <ul class='nav navbar navbar-expand-lg navbar-light bg-light'>
-        <li class='nav-link'>
-            <a href="{{url_for('core.index')}}">Home</a>
-        </li>
-        
-    {% if current_user.is_authenticated %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="{{url_for('core.index')}}"margin>PAATHSHAALA</a>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" href="{{url_for('core.index')}}">Home</a>
+              </li>
+              {% if current_user.is_authenticated %}
             
-        <li class='nav-link'>
-            <a href="{{url_for('professors.account')}}">Account</a>
-        </li>
-        <li class='nav-link'>
-            <a href="{{url_for('professors.logout')}}">Log Out</a>
-        </li>
-        
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{url_for('professors.account')}}">Account</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{url_for('professors.logout')}}">Log Out</a>
+                </li>
+              {% else %}
 
-    {% else %}
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{url_for('professors.login')}}">Log In</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{url_for('professors.register')}}">Register</a>
+                </li>
+              {% endif %}
+              <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
+                <div style="position: absolute; right: 2%"class="navbar-text ml-auto">
+                    Professor Portal
+                </div>
+              </ul>
+            </ul>
 
-        
-        <li class='nav-link'>
-            <a href="{{url_for('professors.login')}}">Log In</a>
-        </li>
-        <li class='nav-link'>
-            <a href="{{url_for('professors.register')}}">Register</a>
-        </li>
-    {% endif %}
-    <span class="navbar-text ml-auto">
-        Professor Portal
-    </span>
-    </ul>
+
+          </div>
+        </div>
+      </nav>
     <div class="container">
         {% block content %}
 

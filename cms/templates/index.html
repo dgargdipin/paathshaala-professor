@@ -12,15 +12,14 @@
 </dd>
 {% endmacro %}
 {% block content %}
-<div class="jumbotron"><h1>
+<div style="margin-top: 2%;" class="jumbotron"><h1>
     {% if current_user.is_authenticated %}
             Welcome {{current_user.name}}</h1>
         {%else%}
-        <h1 class="display-4">Welcome to Course Management System</h1>
+        <h1 class="display-4">Paathshaala</h1>
         <hr class="my-4">
-        <p class="lead">This is the CS 207 Database Management System created by Dipin Garg, Harsh Kushwaha and Jainil Shah.
-            <br>With this project
-            we hope to ease up this difficult process of online classes for both professors and students.</p>
+        <h4 class="lead">This is the CS258 project created by Dipin Garg, Arastu, Abhishek Bansal, Prasheel Kumar Tiwari, Harsh Kushwaha and Jainil Shah.</h4>
+        <h4 class="lead">With this project we hope to ease up this difficult process of online classes for both professors and students.</h4>
 
     {% endif %}
 
@@ -116,5 +115,3 @@
 
 </div>
 {% endblock %}
-
-

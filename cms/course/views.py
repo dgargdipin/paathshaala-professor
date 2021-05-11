@@ -291,7 +291,7 @@ def display_quiz(course_id: int, quiz_id: int):
             elif a == '4':
                 cur_bool_values[3] = True
         bool_values.append(cur_bool_values)
-    return render_template('display_quiz.html', questions=quiz.questions, course_id=course_id, quiz_id=quiz_id,
+    return render_template('display_quiz.html', quiz=quiz, course_id=course_id, quiz_id=quiz_id,
                            bool_values=bool_values)
 
 
