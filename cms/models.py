@@ -301,5 +301,5 @@ class DiscussionPost(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     title = db.Column(db.String())
     details = db.Column(db.String())
-    timeofpost = db.Column(db.DateTime, nullable= False, default= datetime.utcnow)
+    timeofpost = db.Column(db.DateTime, nullable= False, default= datetime.now)
     attachments = db.relationship('Attachment', backref='post')
