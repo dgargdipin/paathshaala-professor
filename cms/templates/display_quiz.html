@@ -25,9 +25,12 @@
 
 
 {% block content %}
+    {% if quiz.start_time.now()<quiz.start_time %}
     <a href="{{ url_for('course.add_question_to_quiz', course_id=course_id, quiz_id=quiz_id) }}" class="btn btn-primary">Add More Questions</a>
+    {% endif %}
+    
     <a href="{{ url_for('course.display_attempts',quiz_id=quiz_id) }}" class="btn btn-primary">View responses</a>
-    {% for question in questions %}
+    {% for question in quiz.questions %}
         {% set cur_count = loop.index - 1 %}
         <div class="container mt-5">
         <div class="d-flex justify-content-center row">
