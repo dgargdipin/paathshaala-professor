@@ -1,5 +1,7 @@
 from bs4 import BeautifulSoup
 import bs4
+from time import sleep
+from datetime import datetime
 import random,string
 def test_addCourse(test_client,init_database,login_default_user):
     response=test_client.post('/',data=dict(name="Data Structures",\
@@ -46,5 +48,89 @@ def test_Assignment(test_client,addCourse):
     assert title in titles
 
     
+def test_professor_view_quiz(test_client, login_default_user):
+    response = test_client.get('/course/1/quizzes')
+    assert response.status_code == 200
+    bs = BeautifulSoup(response.data, 'lxml')
+    start = bs.find('h5', class_='start')
+    end = bs.find('h5',class_="end")
+    q1 = bs.find('a', class_='q1')
+    start_time = start.text
+    end_time = end.text
+    link=q1['href']
+    print(response.data)
+    response1 = test_client.get(link)
+    assert response1.status_code == 200
+    assert b'Quiz1' in response.data
+
+
+def test_professor_create_quiz(test_client, login_default_user):
+    response=test_client.post('/course/1/quizzes/create_quiz',data=dict(name="Quiz2",\
+        start_time=datetime(2021, 5, 21, 8, 10, 10, 10),end_time=datetime(2021, 5, 21, 8, 11, 10, 10),
+        submit="true"),follow_redirects=True)
+    assert response.status_code==200
+    assert b'Question ?' in response.data
+    assert b'Multi Correct Question ?' in response.data
+    assert b'Partial Marking ?' in response.data
+    assert b'Marks' in response.data
+    assert b'Option 1' in response.data
+    assert b'Multi Correct Question ?' in response.data
+    assert b'Option 2' in response.data
+        
+        
+
+def test_professor_add_question(test_client, login_default_user):
+    response=test_client.post('/course/1/quizzes/1/add_question',data=dict(question="Odd one out",is_multi_correct=False,is_partial=False, 
+    marks=2,option1="flask", option2="django", option3="ruby on rails", option4="expressjs", ans='4',
+        submit="true"),follow_redirects=True)
+    print(response.data)
+    assert response.status_code == 200
+    assert b'Odd one out' in response.data
+    assert b'flask' in response.data
+    assert b'django' in response.data
+    assert b'ruby on rails' in response.data
+    assert b'expressjs' in response.data
+
+
     
+def test_professor_view_all_questions(test_client, login_default_user):
+    response = test_client.get('/course/1/quizzes/1/')
+    print(response.data)
+    
+    assert response.status_code == 200
+    # 1st question in quiz
+    assert b'Odd one out' in response.data
+    assert b'Marks: 2' in response.data
+    assert b'flask' in response.data
+    assert b'django' in response.data
+    assert b'ruby on rails' in response.data
+    assert b'expressjs' in response.data
+
+    # 2nd question in quiz
+    assert b'Cities in Maharastra' in response.data
+    assert b'Marks: 4' in response.data
+    assert b'Indore' in response.data
+    assert b'Nasik' in response.data
+    assert b'Mumbai' in response.data
+    assert b'Bombay' in response.data
+    
+
+def test_professor_enrollment_request(test_client, login_default_user):
+    response = test_client.get('/course/1')
+    assert response.status_code == 200
+    bs = BeautifulSoup(response.data, 'lxml')
+    enroll_req_link = bs.find('a', class_='e1')['href']
+    
+    response1 = test_client.get(enroll_req_link)
+    assert response1.status_code == 200
+    assert b'Dipin' in response1.data
+    bs = BeautifulSoup(response1.data, 'lxml')
+    accept_enroll_req = bs.find('a', class_='e2')['href']
+    print(accept_enroll_req)
+    
+    response2 = test_client.get(accept_enroll_req,follow_redirects=True)
+    print("response2 = ")
+    print(response2.data)
+    assert response2.status_code == 200
+    assert b'Enrolled.' in response2.data
 
