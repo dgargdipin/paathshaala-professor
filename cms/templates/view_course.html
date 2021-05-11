@@ -46,7 +46,7 @@
         {% if course.assignments %}
         {% for assignment in course.assignments %}
         <div class="card" style="width: 100%;">
-          <div class="card-body">
+          <div class="card-body assignmentCard">
             <h5 class="card-title">{{assignment.title}} <small class="text-muted"> Deadline : <u>{{assignment.deadline.strftime('%I:%M %p, %d %b %Y')}}</u></small>
 {% if course.professor.id==current_user.id %}
               <a href="{{url_for('course.remove_assignment',assignment_id=assignment.id)}}"><i
