@@ -12,7 +12,7 @@
 </dd>
 {% endmacro %}
 {% block content %}
-<div class="jumbotron"><h1>
+<div style="margin-top: 2%;" class="jumbotron"><h1>
     {% if current_user.is_authenticated %}
             Welcome {{current_user.name}}</h1>
         {%else%}
