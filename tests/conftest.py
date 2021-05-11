@@ -122,3 +122,25 @@ def addCourse(test_client,init_database,login_default_user):
             response=test_client.get(url)
             break
     yield response,url
+
+@pytest.fixture(scope='module')
+def view_discussion_forum(test_client,addCourse):
+    print("viewing discussion forum")
+    response=test_client.get(addCourse[1],follow_redirects=True)
+    assert response.status_code==200
+    soup=BeautifulSoup(response.data,'lxml')
+    discussion_a = soup.find('a', id="viewDiscussionForum")
+    assert discussion_a is not None
+    response=test_client.get(discussion_a['href'],follow_redirects=True)
+    assert response.status_code==200
+    yield response,discussion_a['href']
+
+@pytest.fixture(scope='module')
+def removeCourse(test_client,init_database,login_default_user,addCourse):
+    print("removing database")
+    response=test_client.get('/course/drop/1',follow_redirects=True)
+    assert response.status_code==200
+    soup=BeautifulSoup(response.data,'lxml')
+    greet = soup.find('div', class_='jumbotron').h1.text
+    print("removed database")
+    yield response, greet

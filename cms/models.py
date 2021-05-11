@@ -290,7 +290,7 @@ class DiscussionThread(db.Model):
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'))
     title = db.Column(db.String())
     details = db.Column(db.String())
-    posts = db.relationship('DiscussionPost', backref='posts')
+    posts = db.relationship('DiscussionPost', backref='discussionThread')
 
 
 class DiscussionPost(db.Model):

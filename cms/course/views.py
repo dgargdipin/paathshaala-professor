@@ -433,4 +433,4 @@ def discussion_forum(course_id: int):
             db.session.commit()
         return redirect(url_for('course.discussion_forum', course_id=course_id))
 
-    return render_template('discussion_forum.html', Posts= Posts, course_id=course_id,Names= Names, addAttachmentForm= addpostForm)
+    return render_template('discussion_forum.html', forum=discussion_forum, course_id=course_id,Names= Names, addAttachmentForm= addpostForm)

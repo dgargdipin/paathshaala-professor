@@ -22,7 +22,7 @@
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addCourseNote">Add Course
       Material</button>
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addAssignment">Add Assignment</button>
-    <a role="button" class="btn btn-primary" href="{{url_for('course.discussion_forum',course_id=course.id)}}">Discussion Forum</a>
+    <a role="button" id="viewDiscussionForum" class="btn btn-primary" href="{{url_for('course.discussion_forum',course_id=course.id)}}">Discussion Forum</a>
     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#confirmDrop">Remove Course</button>
     <a href="{{ url_for('course.all_quizzes', course_id=course.id) }}" class="btn btn-primary">View Quizzes</a>
     <a role="button" class="btn btn-primary e1" href="{{url_for('course.view_requests',course_id=course.id)}}">View enrollment requests</a>

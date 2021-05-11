@@ -134,3 +134,44 @@ def test_professor_enrollment_request(test_client, login_default_user):
     assert response2.status_code == 200
     assert b'Enrolled.' in response2.data
 
+def test_discussion(test_client,view_discussion_forum):
+    # print(view_discussion_forum[0].data.decode("utf-8"))
+
+    soup = BeautifulSoup(view_discussion_forum[0].data, 'lxml')
+
+    heading=soup.find('h1',id="discussionHeading")
+    assert heading is not None
+    content=''.join(random.choice(string.ascii_lowercase) for i in range(10))
+    postResponse=test_client.post(view_discussion_forum[1],data=dict(details=content,submit="Submit"),follow_redirects=True)
+    assert postResponse.status_code==200
+    soup=BeautifulSoup(postResponse.data, 'lxml')
+    posts_list= []
+    print("soup.find_all('div', class_='postContent')==>", soup.find_all('div', class_='postContent'))
+    for post in soup.find_all('div', class_='postContent'):
+        posts_list.append(post.text.strip())
+
+    assert content in posts_list
+
+
+    content=''.join(random.choice(string.ascii_lowercase) for i in range(10))
+    postResponse=test_client.post(view_discussion_forum[1],data=dict(content=content),follow_redirects=True)
+    assert postResponse.status_code==200
+    soup=BeautifulSoup(postResponse.data, 'lxml')
+    posts_list= []
+    print("soup.find_all('div', class_='postContent')==>", soup.find_all('div', class_='postContent'))
+    for post in soup.find_all('div', class_='postContent'):
+        posts_list.append(post.text.strip())
+
+    assert content in posts_list
+
+def test_remove_course(test_client,removeCourse):
+    assert removeCourse[0].status_code==200
+    assert 'Welcome Professor 1' in removeCourse[1]
+    assert 'Welcome to Course Management System' not in removeCourse[1]
+    courses_list= []
+    soup = BeautifulSoup(removeCourse[0].data, 'lxml')
+    for course in soup.find_all('td'):
+        if(course.get('a')):
+            courses_list.append(course.a.text)
+
+    assert 'Data Structures' not in courses_list
