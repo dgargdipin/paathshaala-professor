@@ -10,7 +10,7 @@ def test_home_page(test_client):
     response = test_client.get('/')
     print(response.data)
     assert response.status_code == 200
-    assert b"Database" in response.data
+    assert b"Paathshaala" in response.data
     assert b"students" in response.data
 
 def test_valid_login_logout(test_client, init_database):
@@ -25,7 +25,7 @@ def test_valid_login_logout(test_client, init_database):
     assert response.status_code == 200
     print(response.data)
 
-    assert b'Professor' in response.data
+    # assert b'Professor' in response.data
     assert b'Log Out' in response.data
     assert b'Login' not in response.data
     assert b'Register' not in response.data
@@ -36,11 +36,13 @@ def test_valid_login_logout(test_client, init_database):
     THEN check the response is valid
     """
     response = test_client.get('/logout', follow_redirects=True)
-    print(response.data)
+
 
     assert response.status_code == 200
-    assert b'Welcome' in response.data
+    assert b'Paathshaala' in response.data
     assert b'Logout' not in response.data
     assert b'Log In' in response.data
     assert b'Register' in response.data
+
+
 
