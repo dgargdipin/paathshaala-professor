@@ -65,7 +65,7 @@ def view_course(course_id):
                 if savename=="":
                     break
                 
-                uploaded_file.save(os.path.join(basedir, '..', '..', 'static_material', savename))
+                uploaded_file.save(os.path.join(basedir, '..', 'static_material', savename))
                 new_attachment = Attachment(
                     filename, file_extension,url_for('course.serve_file',filename=savename),newCourseNote.id)
                 attachments.append(new_attachment)
@@ -101,7 +101,7 @@ def view_course(course_id):
                 if savename=="":
                     break
                 
-                uploaded_file.save(os.path.join(basedir, '..', '..', 'static_material', savename))
+                uploaded_file.save(os.path.join(basedir, '..', 'static_material', savename))
                 new_attachment = Attachment(
                     filename, file_extension,url_for('course.serve_file',filename=savename),assignment_id=newAssignment.id)
                 attachments.append(new_attachment)
@@ -140,7 +140,7 @@ def remove_courseNote(courseNote_id):
     if cnd.attachments:
         for attachment in cnd.attachments:
             file_path = os.path.join(
-                basedir, "..", "..", "static_material", os.path.basename(attachment.link))
+                basedir, "..", "static_material", os.path.basename(attachment.link))
             if os.path.isfile(file_path):
                 os.remove(file_path)
             db.session.delete(attachment)
@@ -160,7 +160,7 @@ def remove_assignment(assignment_id):
     cnd=courseNotetoDelete
     if cnd.attachments:
         for attachment in cnd.attachments:
-            file_path = os.path.join(basedir, "..", "..", "static_material", os.path.basename(attachment.link))
+            file_path = os.path.join(basedir, "..", "static_material", os.path.basename(attachment.link))
             if os.path.isfile(file_path):
                 os.remove(file_path)
             db.session.delete(attachment)
@@ -169,7 +169,7 @@ def remove_assignment(assignment_id):
             if submission.attachments:
                 for attachment in submission.attachments:
                     file_path = os.path.join(
-                        basedir, "..", "..", "static_material", os.path.basename(attachment.link))
+                        basedir, "..", "static_material", os.path.basename(attachment.link))
                     if os.path.isfile(file_path):
                         os.remove(file_path)
                     db.session.delete(attachment)
@@ -192,8 +192,8 @@ def export_students_course(course_id:int):
     savename = str(course.name) + \
         datetime.now().strftime("%Y-%m-%d_%H:%M")+'.xlsx'
     savename=secure_filename(savename)
-    df.to_excel(os.path.join(basedir, '..', '..', 'temp',savename),index=True)
-    return send_from_directory(os.path.join(basedir, '..', '..', 'temp'), filename=savename, as_attachment=True)
+    df.to_excel(os.path.join(basedir, '..', 'temp',savename),index=True)
+    return send_from_directory(os.path.join(basedir, '..', 'temp'), filename=savename, as_attachment=True)
 
 
 
@@ -424,7 +424,7 @@ def discussion_forum(course_id: int):
                     if savename=="":
                         break
                     
-                    uploaded_file.save(os.path.join(basedir, '..', '..', 'static_material', savename))
+                    uploaded_file.save(os.path.join(basedir, '..', 'static_material', savename))
                     new_attachment = Attachment(
                         filename, file_extension,url_for('course.serve_file',filename=savename),discussionpost_id=new_post.id)
                     attachments.append(new_attachment)
