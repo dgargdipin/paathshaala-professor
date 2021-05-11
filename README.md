@@ -37,8 +37,8 @@ source venv/bin/activate
 venv\Scripts\activate.bat# if you're on windows run the following command instead of above
 pip install -e .
 export testing=true
-``
-then just a simple `pytest -v` will run all the functional and unittests.
+```
+then just a simple `pytest -v` will run all the functional and unit tests.
 
 
 
