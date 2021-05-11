@@ -9,19 +9,25 @@
 
 {% block content %}
     <div>
-    <a href="{{ url_for('course.create_quiz', course_id=course_id) }}" class="btn btn-primary">Create Quiz</a>
     </div>
+        {% if quizzes %}
         {% for quiz in quizzes %}
-            <div class="card">
-              <h5 class="card-header">{{ quiz.name }}</h5>
-              <div class="card-body">
-                  <a href="{{ url_for('course.display_quiz', course_id=course_id, quiz_id=quiz.id) }}"
-                   class="btn btn-primary btn-lg q1" role="button" aria-pressed="true">{{ quiz.name }}</a>
-                <h5 class="card-text start">Start Time: {{ quiz.start_time }}</h5>
-                <h5 class="card-text end">End Time: {{ quiz.end_time }}</h5>
-              </div>
-            </div>
-        <div>
+        <div class="card">
+          <h5 class="card-header">{{ quiz.name }}</h5>
+          <div class="card-body">
+              <a href="{{ url_for('course.display_quiz', course_id=course_id, quiz_id=quiz.id) }}"
+               class="btn btn-primary btn-lg q1" role="button" aria-pressed="true">{{ quiz.name }}</a>
+            <h5 class="card-text start">Start Time: {{ quiz.start_time }}</h5>
+            <h5 class="card-text end">End Time: {{ quiz.end_time }}</h5>
+          </div>
         </div>
-    {% endfor %}
+    <div>
+    </div>
+{% endfor %}
+        {% else %}
+        <h1 class="display-5 d-flex align-items-center justify-content-center ">No quiz yet</h1>
+
+        {% endif %}
+        <a href="{{ url_for('course.create_quiz', course_id=course_id) }}" class="btn btn-primary">Create Quiz</a>
+        
 {% endblock content %}e
