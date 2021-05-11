@@ -33,7 +33,7 @@ The professor portal can be opened up at localhost:5000
 ## Testing
 To run tests on the app, run the following commands(in the root folder of app)
 ```bash
-source venv/bin/activate 
+source ../paathshaala-user/venv/bin/activate 
 venv\Scripts\activate.bat# if you're on windows run the following command instead of above
 pip install -e .
 export testing=true
