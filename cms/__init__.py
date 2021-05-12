@@ -4,6 +4,8 @@ import os
 from flask_login import LoginManager
 app =Flask(__name__)
 app.config['SECRET_KEY']='mysecret'
+app.config.update(SESSION_COOKIE_NAME='app_professor')
+
 basedir=os.path.abspath(os.path.dirname(__file__))
 print(basedir)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + \
