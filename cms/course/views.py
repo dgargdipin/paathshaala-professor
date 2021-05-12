@@ -391,15 +391,16 @@ def discussion_forum(course_id: int):
     for post in Posts:
         temp_user = User.query.filter_by(id= post.user_id).first()
         if not temp_user:
-            temp_user = Professor.query.filter_by(id= post.user_id).first()
+            temp_user = Professor.query.filter_by(id= (post.user_id)/100).first()
         Names[post.user_id] = temp_user.name
 
     addpostForm= postForm()
     if request.method == 'POST':
         if request.form.get("content"):
             content = request.form.get("content")
-            user_id = current_user.id
+            user_id = current_user.id*100
             new_post = DiscussionPost(user_id= user_id, discussion_id= discussion_forum.id, details= content)
+            print("user_id= ",user_id)
             db.session.add(new_post)
             db.session.commit() 
         # return render_template('discussion_forum.html', Posts= Posts, course_id=course_id,Names= Names)
@@ -407,7 +408,7 @@ def discussion_forum(course_id: int):
             attachments=[]
             if not current_user.is_authenticated:
                 abort(405)
-            user_id = current_user.id
+            user_id = current_user.id*100
             new_post=DiscussionPost(details=addpostForm.details.data, user_id= user_id, discussion_id= discussion_forum.id)
             db.session.add(new_post)
             db.session.commit()

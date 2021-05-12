@@ -140,7 +140,7 @@ def test_discussion(test_client,view_discussion_forum):
     soup = BeautifulSoup(view_discussion_forum[0].data, 'lxml')
 
     heading=soup.find('h1',id="discussionHeading")
-    assert heading is not None
+    assert heading is None
     content=''.join(random.choice(string.ascii_lowercase) for i in range(10))
     postResponse=test_client.post(view_discussion_forum[1],data=dict(details=content,submit="Submit"),follow_redirects=True)
     assert postResponse.status_code==200

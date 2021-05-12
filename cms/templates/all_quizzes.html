@@ -2,27 +2,27 @@
 {% extends 'base.html' %}
 {% block personal %}
     <style>
-    div {
+    .page_content {
         padding: 30px 15px 25px 40px;
     }
     </style>
 {% endblock personal %}
 
 {% block content %}
-    <div>
+    <div class="page_content">
     </div>
         {% if quizzes %}
         {% for quiz in quizzes %}
-        <div class="card">
+        <div class="card page_content">
           <h5 class="card-header">{{ quiz.name }}</h5>
-          <div class="card-body">
+          <div class="card-body page_content">
               <a href="{{ url_for('course.display_quiz', course_id=course_id, quiz_id=quiz.id) }}"
                class="btn btn-primary btn-lg q1" role="button" aria-pressed="true">{{ quiz.name }}</a>
             <h5 class="card-text start">Start Time: {{ quiz.start_time }}</h5>
             <h5 class="card-text end">End Time: {{ quiz.end_time }}</h5>
           </div>
         </div>
-    <div>
+    <div class="page_content">
     </div>
 {% endfor %}
         {% else %}
